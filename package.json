@@ -57,7 +57,7 @@
 		"highlight.js": "^11.9.0",
 		"highlightjs-copy": "^1.0.5",
 		"javascript-time-ago": "^2.5.9",
-		"openai": "^4.11.1",
+		"openai": "^4.19.1",
 		"random-word-slugs": "^0.1.7",
 		"sse.js": "^1.0.0",
 		"svelte-legos": "^0.2.2",
