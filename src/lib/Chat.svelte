@@ -41,7 +41,7 @@
 </script>
 
 {#if chat}
-	<div class="flex flex-col container h-full mx-auto px-4 md:px-8" style="justify-content: end">
+	<div class="flex flex-col container h-full mx-auto px-4 md:px-8 justify-start">
 		<slot name="additional-content-top" />
 
 		<div class="flex flex-col space-y-6 pt-6">
