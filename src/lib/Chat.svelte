@@ -49,7 +49,7 @@
 			<ChatMessages {slug} siblings={chat.messages} on:editMessage />
 
 			<!-- Live Message -->
-			{#if $isLoadingAnswerStore}
+			{#if $isLoadingAnswerStore && $enhancedLiveAnswerStore.content}
 				<div class="place-self-start">
 					<div class="p-5 rounded-2xl variant-ghost-tertiary rounded-tl-none">
 						{@html snarkdown($enhancedLiveAnswerStore.content)}
