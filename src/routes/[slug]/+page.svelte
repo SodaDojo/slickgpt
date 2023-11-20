@@ -20,7 +20,8 @@
 		showToast,
 		suggestChatTitle,
 		track,
-		type ChatMessage
+		type ChatMessage,
+		useSsrOpenAiKey
 	} from '$misc/shared';
 	import SvelteMarkdown from 'svelte-markdown';
 
@@ -149,7 +150,7 @@
 				>
 					<Cog6Tooth class="w-6 h-6" />
 				</button>
-				{#if !$settingsStore.openAiApiKey}
+				{#if !$settingsStore.openAiApiKey && !useSsrOpenAiKey()}
 					<span class="relative flex h-3 w-3">
 						<span
 							style="left: -10px;"
@@ -166,7 +167,7 @@
 			<!-- Share -->
 			<span
 				class="relative inline-flex"
-				style={!$settingsStore.openAiApiKey ? 'margin-left: -4px;' : ''}
+				style={(!$settingsStore.openAiApiKey && !useSsrOpenAiKey()) ? 'margin-left: -4px;' : ''}
 			>
 				<button
 					disabled={!chat.contextMessage.content?.length && !chat.messages?.length}

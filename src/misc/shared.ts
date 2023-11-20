@@ -8,6 +8,7 @@ import vercelAnalytics from '@vercel/analytics';
 import { goto } from '$app/navigation';
 import { chatStore, settingsStore } from './stores';
 import { PUBLIC_DISABLE_TRACKING } from '$env/static/public';
+import { PUBLIC_USE_SSR_OPENAI_API_KEY } from '$env/static/public';
 
 export interface ChatMessage extends ChatCompletionMessageParam {
 	id?: string;
@@ -146,4 +147,8 @@ export function showToast(
 		timeout
 	};
 	toastStore.trigger(toast);
+}
+
+export function useSsrOpenAiKey(): boolean {
+	return PUBLIC_USE_SSR_OPENAI_API_KEY === 'true';
 }

@@ -7,6 +7,7 @@ import type { RequestHandler } from './$types';
 import { OpenAiModel, defaultOpenAiSettings, type OpenAiSettings } from '$misc/openai';
 import { error } from '@sveltejs/kit';
 import { getErrorMessage, respondToClient, throwIfUnset } from '$misc/error';
+import { OPENAI_API_KEY } from '$env/static/private';
 
 // this tells Vercel to run this function as https://vercel.com/docs/concepts/functions/edge-functions
 export const config: Config = {
@@ -36,7 +37,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 			model: OpenAiModel.Gpt35Turbo
 		};
 
-		const openAiKey: string = requestData.openAiKey;
+		const openAiKey: string = OPENAI_API_KEY || requestData.openAiKey;
 		throwIfUnset('OpenAI API key', openAiKey);
 
 		const completionOpts: ChatCompletionCreateParamsNonStreaming = {
