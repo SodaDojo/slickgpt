@@ -2,7 +2,7 @@
 	import type { ChatMessage } from '$misc/shared';
 	import { createEventDispatcher } from 'svelte';
 	import { type ModalSettings, getModalStore } from '@skeletonlabs/skeleton';
-	import snarkdown from 'snarkdown';
+	import SvelteMarkdown from 'svelte-markdown';
 	import { XMark, PencilSquare } from '@inqling/svelte-icons/heroicon-24-solid';
 	import { chatStore } from '$misc/stores';
 	import { countTokens } from '$misc/openai';
@@ -74,9 +74,11 @@
 	</div>
 
 	<!-- Message Content -->
-	<div>
-		{@html snarkdown(message.content)}
-	</div>
+	{#if message.content}
+		<div>
+			<SvelteMarkdown source={message.content} options={{breaks:true}}/>
+		</div>
+	{/if}
 </div>
 
 {#if renderChildren && message.messages}

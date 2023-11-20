@@ -22,7 +22,7 @@
 		track,
 		type ChatMessage
 	} from '$misc/shared';
-	import snarkdown from 'snarkdown';
+	import SvelteMarkdown from 'svelte-markdown';
 
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -217,7 +217,7 @@
 			>
 				{#if hasContext && chat.contextMessage.content}
 					<p>
-						{@html snarkdown(chat.contextMessage.content)}
+						<SvelteMarkdown source={chat.contextMessage.content} options={{breaks:true}}/>
 					</p>
 				{/if}
 				{#if hasStopSequence}

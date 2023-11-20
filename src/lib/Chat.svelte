@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, onMount } from 'svelte';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
-	import snarkdown from 'snarkdown';
+	import SvelteMarkdown from 'svelte-markdown';
 	import { afterNavigate } from '$app/navigation';
 	import type { Chat } from '$misc/shared';
 	import { chatStore, enhancedLiveAnswerStore, isLoadingAnswerStore } from '$misc/stores';
@@ -52,7 +52,7 @@
 			{#if $isLoadingAnswerStore && $enhancedLiveAnswerStore.content}
 				<div class="place-self-start">
 					<div class="p-5 rounded-2xl variant-ghost-tertiary rounded-tl-none">
-						{@html snarkdown($enhancedLiveAnswerStore.content)}
+						<SvelteMarkdown source={$enhancedLiveAnswerStore.content} options={{breaks:true}}/>
 					</div>
 				</div>
 			{/if}
