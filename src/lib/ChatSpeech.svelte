@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { isLoadingAnswerStore, liveAnswerStore } from "$misc/stores";
+	import { useSsrOpenAiKey } from "$misc/shared";
+	import { isLoadingAnswerStore, liveAnswerStore, settingsStore } from "$misc/stores";
 	import { onMount } from "svelte";
 
     let speechBlocks: string[] = [];
@@ -26,7 +27,7 @@
                         }
 
                         if (!isSkippingCodeBlock) {
-                            // console.log('Adding block', newBlock);
+                            console.log('Adding block', newBlock);
                             pushBlockToQueue(newBlock);
                         }
                     }
@@ -66,7 +67,7 @@
             return;
         }
 
-        // console.log('Adding new block', normalizedBlock);
+        console.log('Queuing block', normalizedBlock);
         speechBlocks.push(normalizedBlock);
     }
 
@@ -82,7 +83,7 @@
         const currentFragment = fullFragment.substring(currentBlockFragmentIndex);
 
 		// Split by punctuation
-		let blocks = currentFragment.split(/[⁣?!;:\n]/g);
+		let blocks = currentFragment.split(/[⁣\n]/g);
         return blocks;
 	}
 
@@ -103,27 +104,80 @@
 
         const block = popBlockFromQueue();
         if (block) {
-            // console.log('Speak', block);
+            console.log('Speak', block);
             try { 
                 await speakMessage(block);
             } catch(error) {
                 console.error(error);
-            } finally {
                 isSpeaking = false;
-                
             }
         }
 
         window.requestAnimationFrame(checkForNewMessages);
     }
 
+    function isUsingOpenAi() {
+        return useSsrOpenAiKey() || $settingsStore.openAiApiKey;
+    }
+
     async function speakMessage(message: string) {
+        if (isUsingOpenAi()) {
+            return speakMessageOpenAi(message);
+        }
+
+        return speakMessageNative(message);
+    }
+
+    async function speakMessageNative(message: string) {
         return new Promise((resolve, reject) => {
             const utterance = new SpeechSynthesisUtterance(message);
             utterance.onend = resolve;
             utterance.onerror = reject;
-            speechSynthesis.speak(utterance);
             isSpeaking = true;
+            speechSynthesis.speak(utterance);
+            isSpeaking = false;
+        });
+    }
+    
+    async function loadAudioBlob(message: string): Promise<Blob | null> {
+        try {
+            const response = await fetch('/api/speak', {
+                method: 'POST',
+                body: JSON.stringify({ apiKey: $settingsStore.openAiApiKey, message })
+            });
+
+            if (!response.body) {
+                return null;
+            }
+
+            const blob = await response.blob();
+		    return blob;
+        } catch(err) {
+            console.error(err);
+        }
+        return null;
+    }
+
+    async function speakMessageOpenAi(message: string) {
+        isSpeaking = true;
+        const audio = new Audio();
+		
+        const blob = await loadAudioBlob(message);
+        if (!blob) {
+            return;
+        }
+        
+		const url = URL.createObjectURL(blob);
+		audio.src = url;
+        
+		return new Promise(async (resolve, reject) => {
+            function onAudioEnd() {
+                isSpeaking = false;
+                audio.removeEventListener('ended', onAudioEnd);
+                resolve(true);
+            }
+            audio.addEventListener('ended', onAudioEnd);
+            await audio.play();
         });
     }
 </script>
