@@ -10,6 +10,8 @@ import { chatStore, settingsStore } from './stores';
 import { PUBLIC_DISABLE_TRACKING } from '$env/static/public';
 import { PUBLIC_USE_SSR_OPENAI_API_KEY } from '$env/static/public';
 
+export const DEFAULT_CONTEXT = 'In order to facilitate text to speech, split the response into sentences and add a custom delimiter ⁣ at the end of every sentence that ends with a period. Every sentence must be split, but do not add modify anything within code.';
+
 export interface ChatMessage extends ChatCompletionMessageParam {
 	id?: string;
 	messages?: ChatMessage[];
@@ -63,7 +65,7 @@ export function createNewChat(template?: {
 		settings,
 		contextMessage: {
 			role: 'system',
-			content: template?.context || ''
+			content: template?.context || DEFAULT_CONTEXT
 		},
 		messages: template?.messages || [],
 		created: new Date()

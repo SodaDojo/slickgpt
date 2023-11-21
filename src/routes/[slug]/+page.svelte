@@ -24,6 +24,7 @@
 		useSsrOpenAiKey
 	} from '$misc/shared';
 	import SvelteMarkdown from 'svelte-markdown';
+	import ChatSpeech from '$lib/ChatSpeech.svelte';
 
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -265,4 +266,5 @@
 	</Chat>
 
 	<ChatInput {slug} chatCost={cost} bind:this={chatInput} />
+	<ChatSpeech />
 {/if}
