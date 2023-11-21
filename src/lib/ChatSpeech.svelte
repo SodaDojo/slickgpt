@@ -2,15 +2,18 @@
 	import { useSsrOpenAiKey } from "$misc/shared";
 	import { isLoadingAnswerStore, liveAnswerStore, settingsStore } from "$misc/stores";
 	import { onMount } from "svelte";
+	import type { Unsubscriber } from "svelte/store";
 
     let speechBlocks: string[] = [];
     let lastBlock: string | undefined = undefined;
     let isSpeaking = false;
     let currentBlockFragmentIndex: number = 0;
     let isSkippingCodeBlock = false;
+    let liveAnswerStoreUnsubscriber: Unsubscriber;
+    let isLoadingAnswerStoreUnsubscriber: Unsubscriber;
 
     onMount(() => {
-        liveAnswerStore.subscribe((currentLiveAnswer) => {
+        liveAnswerStoreUnsubscriber = liveAnswerStore.subscribe((currentLiveAnswer) => {
             const content = currentLiveAnswer.content;
             if (content) {
                 const newBlocks = getSpeechBlocksFromFragment(content);
@@ -42,7 +45,7 @@
             }
         });
 
-        isLoadingAnswerStore.subscribe(isLoading => {
+        isLoadingAnswerStoreUnsubscriber = isLoadingAnswerStore.subscribe(isLoading => {
             if (!isLoading) {
                 // Push the last block now that we know it is complete.
                 if (lastBlock) {
@@ -53,6 +56,11 @@
         });
 
         checkForNewMessages();
+
+        return (() => {
+            liveAnswerStoreUnsubscriber();
+            isLoadingAnswerStoreUnsubscriber();
+        })
     });
 
     function reset() {
