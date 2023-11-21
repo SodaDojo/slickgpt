@@ -123,7 +123,7 @@
 	}
 
 	function handleAbort(_event: MessageEvent<any>) {
-		// th message we're adding is incomplete, so HLJS probably can't highlight it correctly
+		// the message we're adding is incomplete, so HLJS probably can't highlight it correctly
 		addCompletionToChat(true);
 	}
 
@@ -208,7 +208,7 @@
 
 	export async function editMessage(message: ChatMessage) {
 		originalMessage = message;
-		input = message.content;
+		input = message.content || '';
 		isEditMode = true;
 
 		// tick is required for the action to resize the textarea
