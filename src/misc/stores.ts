@@ -20,7 +20,7 @@ export const enhancedLiveAnswerStore = derived(liveAnswerStore, ($liveAnswer) =>
 	}
 
 	let { content } = $liveAnswer;
-	content = closeOpenedCodeTicks(content);
+	content = closeOpenedCodeTicks(content as string);
 
 	return {
 		...$liveAnswer,
