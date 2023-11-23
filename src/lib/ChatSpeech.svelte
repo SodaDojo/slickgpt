@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { useSsrOpenAiKey } from "$misc/shared";
-	import { isLoadingAnswerStore, liveAnswerStore, settingsStore } from "$misc/stores";
+	import { isLoadingAnswerStore, liveAnswerStore, settingsStore, speechBlocksStore } from "$misc/stores";
 	import { onMount } from "svelte";
 	import type { Unsubscriber } from "svelte/store";
 
-    let speechBlocks: string[] = [];
     let lastBlock: string | undefined = undefined;
     let isSpeaking = false;
     let currentBlockFragmentIndex: number = 0;
@@ -76,11 +75,18 @@
         }
 
         console.log('Queuing block', normalizedBlock);
-        speechBlocks.push(normalizedBlock);
+        speechBlocksStore.update(store =>  [...store, normalizedBlock] );
     }
 
     function popBlockFromQueue() {
-        return speechBlocks.shift();
+        if ($speechBlocksStore.length === 0) {
+            return undefined;
+        }
+
+        const firstElement = $speechBlocksStore[0];
+        speechBlocksStore.update(store =>  store.slice(1));
+
+        return firstElement;
     }
 
     function getSpeechBlocksFromFragment(fullFragment: string|null): string[] {
