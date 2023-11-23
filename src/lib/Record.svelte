@@ -43,6 +43,7 @@
 		});
 		const { msg } = await response.json();
 		input = msg;
+		dispatch('inputChange');
 	}
 
 	function stopRecording() {

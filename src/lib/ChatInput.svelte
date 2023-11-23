@@ -269,7 +269,12 @@
 							>
 								<CodeBracket class="w-6 h-6" />
 							</button>
-							<Record bind:input />
+							<Record bind:input
+								on:inputChange={async () => {
+									await tick();
+									handleSubmit();
+								}}
+							/>
 							<!-- Send button -->
 							<button type="submit" class="btn btn-sm ml-2">
 								<PaperAirplane class="w-6 h-6" />
