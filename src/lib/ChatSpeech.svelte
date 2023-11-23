@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useSsrOpenAiKey } from "$misc/shared";
-	import { isLoadingAnswerStore, liveAnswerStore, settingsStore, speechBlocksStore } from "$misc/stores";
+	import { isLoadingAnswerStore, liveAnswerStore, settingsStore, speechBlobStore, speechBlocksStore } from "$misc/stores";
 	import { onMount } from "svelte";
 	import type { Unsubscriber } from "svelte/store";
 
@@ -30,7 +30,7 @@
                         }
 
                         if (!isSkippingCodeBlock) {
-                            console.log('Adding block', newBlock);
+                            // console.log('Adding block', newBlock);
                             pushBlockToQueue(newBlock);
                         }
                     }
@@ -89,8 +89,21 @@
             return;
         }
 
-        console.log('Queuing block', normalizedBlock);
+        // console.log('Queuing block', normalizedBlock);
         speechBlocksStore.update(store =>  [...store, { text: normalizedBlock }] );
+
+        // Load the audio and cache
+        setTimeout(async () => {
+            // console.log('Async loading audio', normalizedBlock);
+            const blob = await loadAudioBlob(normalizedBlock) || undefined;
+            if (blob) {
+                speechBlobStore.update(current => {
+                    // Clone the current record and add the new key-value pair
+                    const newRecord = { ...current, [normalizedBlock]: blob };
+                    return newRecord;
+                });
+            }
+        }, 10);
     }
 
     function popBlockFromQueue() {
@@ -133,7 +146,7 @@
 
         const block = popBlockFromQueue();
         if (block) {
-            console.log('Speak', block.text);
+            // console.log('Speak', block.text);
             try { 
                 await speakMessage(block.text);
             } catch(error) {
@@ -189,14 +202,21 @@
 
     async function speakMessageOpenAi(message: string) {
         isSpeaking = true;
-        const audio = new Audio();
-		
-        const blob = await loadAudioBlob(message);
-        if (!blob) {
+        
+        let blob: Blob | null = $speechBlobStore[message];
+        
+        if (blob) {
+            // console.log('Using pre-loaded blob');
+        } else {
+            // console.log('No blob. Retrying in 100ms.');
+            setTimeout(() => {
+                speakMessageOpenAi(message);
+            }, 100);
             return;
         }
         
 		const url = URL.createObjectURL(blob);
+        const audio = new Audio();
 		audio.src = url;
         
 		return new Promise(async (resolve, reject) => {

@@ -41,6 +41,8 @@ export interface SpeechBlock {
 
 export const speechBlocksStore: Writable<SpeechBlock[]> = writable([]);
 
+export const speechBlobStore: Writable<Record<string, Blob>> = writable({});
+
 /**
  * Custom chat store
  **/
