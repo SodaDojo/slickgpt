@@ -10,6 +10,7 @@
     let isSkippingCodeBlock = false;
     let liveAnswerStoreUnsubscriber: Unsubscriber;
     let isLoadingAnswerStoreUnsubscriber: Unsubscriber;
+    let timerId: any;
 
     onMount(() => {
         liveAnswerStoreUnsubscriber = liveAnswerStore.subscribe((currentLiveAnswer) => {
@@ -54,13 +55,27 @@
             }
         });
 
-        checkForNewMessages();
+        startTimer();
 
         return (() => {
+            stopTimer();
             liveAnswerStoreUnsubscriber();
             isLoadingAnswerStoreUnsubscriber();
         })
     });
+
+    function startTimer() {
+        timerId = setInterval(async () => {
+            await checkForNewMessages();
+        });
+    }
+
+    function stopTimer() {
+        if (timerId) {
+            clearInterval(timerId);
+            timerId = null;
+        }
+    }
 
     function reset() {
         lastBlock = undefined;
