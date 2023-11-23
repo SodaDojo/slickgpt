@@ -20,6 +20,7 @@
 		settingsStore
 	} from '$misc/stores';
 	import { countTokens } from '$misc/openai';
+	import Record from './Record.svelte';
 
 	export let slug: string;
 	export let chatCost: ChatCost | null;
@@ -268,6 +269,7 @@
 							>
 								<CodeBracket class="w-6 h-6" />
 							</button>
+							<Record bind:input />
 							<!-- Send button -->
 							<button type="submit" class="btn btn-sm ml-2">
 								<PaperAirplane class="w-6 h-6" />
