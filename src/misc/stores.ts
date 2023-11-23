@@ -34,8 +34,12 @@ export const isTimeagoInitializedStore: Writable<boolean> = writable(false);
 
 export const eventSourceStore: Readable<EventSource> = readable(new EventSource());
 
-export const speechBlocksStore: Writable<string[]> = writable([]);
+export interface SpeechBlock {
+	text: string;
+	audioBlob?: Blob;
+}
 
+export const speechBlocksStore: Writable<SpeechBlock[]> = writable([]);
 
 /**
  * Custom chat store

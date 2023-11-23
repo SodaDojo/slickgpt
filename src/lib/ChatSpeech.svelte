@@ -75,7 +75,7 @@
         }
 
         console.log('Queuing block', normalizedBlock);
-        speechBlocksStore.update(store =>  [...store, normalizedBlock] );
+        speechBlocksStore.update(store =>  [...store, { text: normalizedBlock }] );
     }
 
     function popBlockFromQueue() {
@@ -118,9 +118,9 @@
 
         const block = popBlockFromQueue();
         if (block) {
-            console.log('Speak', block);
+            console.log('Speak', block.text);
             try { 
-                await speakMessage(block);
+                await speakMessage(block.text);
             } catch(error) {
                 console.error(error);
                 isSpeaking = false;
