@@ -18,7 +18,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
-		"format": "prettier --plugin-search-dir . --write ."
+		"format": "prettier --plugin-search-dir . --write .",
+		"prebuild": "cp node_modules/@ricky0123/vad-web/dist/silero_vad.onnx node_modules/@ricky0123/vad-web/dist/vad.worklet.bundle.min.js node_modules/onnxruntime-web/dist/*.wasm static"
 	},
 	"devDependencies": {
 		"@skeletonlabs/skeleton": "^2.2.0",
@@ -50,6 +51,7 @@
 	"dependencies": {
 		"@floating-ui/dom": "^1.5.3",
 		"@inqling/svelte-icons": "^4.0.2",
+		"@ricky0123/vad-web": "^0.0.13",
 		"@vercel/analytics": "^1.1.0",
 		"common-tags": "^1.8.2",
 		"firebase": "^10.4.0",
@@ -57,6 +59,7 @@
 		"highlight.js": "^11.9.0",
 		"highlightjs-copy": "^1.0.5",
 		"javascript-time-ago": "^2.5.9",
+		"onnxruntime-web": "^1.16.3",
 		"openai": "^4.19.1",
 		"random-word-slugs": "^0.1.7",
 		"sse.js": "^1.0.0",

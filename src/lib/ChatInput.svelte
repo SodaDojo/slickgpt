@@ -272,6 +272,8 @@
 							<Record bind:input
 								on:inputChange={async () => {
 									await tick();
+								}}
+								on:submitMessage={() => {
 									handleSubmit();
 								}}
 							/>
