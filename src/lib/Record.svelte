@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isRecordingStore, settingsStore, vadStore } from '$misc/stores';
+	import { settingsStore } from '$misc/stores';
 	import { Microphone, Stop } from '@inqling/svelte-icons/heroicon-24-solid';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { MicVAD, utils } from '@ricky0123/vad-web';
@@ -7,6 +7,8 @@
 
 	export let startRecordingOnLoad: boolean = false;
 	export let autoSubmitMs: number = 3000;
+	export let vad: MicVAD | null = null;
+	export let isRecording = false;
 
 	// Re-configure ort
 	ort.env.wasm.wasmPaths = {
@@ -28,6 +30,10 @@
 		}
 		
 		doSetup();
+
+		return () => {
+			stopRecording();
+		}
 	});
 
 	function onSpeechEnd(audio: Float32Array) {
@@ -66,15 +72,9 @@
 	}
 
 	async function setupVad() {
-		if ($vadStore) {
-			return;
-		}
-
 		vadLoading = true;
-		let myvad: MicVAD | null;
-
 		try {
-			myvad = await MicVAD.new({
+			vad = await MicVAD.new({
 				modelURL: "/silero_vad.onnx",
 			    workletURL: "/vad.worklet.bundle.min.js",
 				positiveSpeechThreshold: 0.8,
@@ -88,8 +88,6 @@
 		} finally {
 			vadLoading = false
 		}
-
-		vadStore.set(myvad);
 
 		if (startRecordingOnLoad) {
 			startRecording();
@@ -126,24 +124,24 @@
 		}
 	}
 
-	export const startRecording = async () => {
-		isRecordingStore.set(true);
-		if ($vadStore) {
-			$vadStore.start();
+	function startRecording() {
+		isRecording = true;
+		if (vad) {
+			vad.start();
 		}
 	}
 
-	export const stopRecording = () => {
+	function stopRecording() {
 		stopAutoTimer();
 		
-		if ($vadStore) {
-			$vadStore.pause()
+		if (vad) {
+			vad.pause()
 		}
-		isRecordingStore.set(false);
+		isRecording = false;
 	}
 
 	function toggleRecording() {
-		if ($isRecordingStore) {
+		if (isRecording) {
 			stopRecording();
 		}
 		else { 
@@ -153,7 +151,7 @@
 </script>
 
 <button type="button" class="btn btn-sm ml-2" on:click={toggleRecording}>
-	{#if $isRecordingStore}
+	{#if isRecording}
 		<Stop class="w-6 h-6 text-red-600" />
 	{:else}
 		<Microphone class="w-6 h-6" />

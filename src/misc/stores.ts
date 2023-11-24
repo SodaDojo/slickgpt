@@ -6,10 +6,6 @@ import { EventSource } from './eventSource';
 import { ChatStorekeeper } from './chatStorekeeper';
 import type { Chat, ChatMessage, ClientSettings } from './shared';
 import { closeOpenedCodeTicks } from './markdownHelper';
-import type { MicVAD } from '@ricky0123/vad-web';
-
-export const vadStore = writable<MicVAD | null>(null);
-export const isRecordingStore = writable<boolean>(false);
 
 export const settingsStore: Writable<ClientSettings> = localStorageStore('settingsStore', {});
 

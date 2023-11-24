@@ -32,7 +32,6 @@
 	let messageTokens = 0;
 	let lastUserMessage: ChatMessage | null = null;
 	let currentMessages: ChatMessage[] | null = null;
-	let stopRecording: any;
 	
 	let isEditMode = false;
 	let originalMessage: ChatMessage | null = null;
@@ -55,7 +54,6 @@
 
 	onDestroy(() => {
 		unsubscribe();
-		stopRecording();
 	});
 
 	let tokensLeft = -1;
@@ -235,76 +233,72 @@
 <footer
 	class="sticky card space-y-4 bottom-0 z-10 variant-filled-surface-700 py-2 md:py-4 md:px-8 md:rounded-xl"
 >
-	{#if $isLoadingAnswerStore}
-		<div class="flex items-center justify-center">
-			<button class="btn variant-ghost w-48 self-center" on:click={() => $eventSourceStore.stop()}>
-				Cancel generating
-			</button>
-		</div>
-	{:else}
-		<div class="flex flex-col space-y-2 md:mx-auto md:w-3/4 px-2 md:px-8">
-			{#if isEditMode}
-				<div class="flex items-center justify-between">
-					<p>Editing creates a <span class="italic">chat branch</span>.</p>
-					<button class="btn btn-sm" on:click={cancelEditMessage}>
-						<span>Cancel</span>
-					</button>
-				</div>
-			{/if}
-			<div class="grid">
-				<form use:focusTrap={!$isLoadingAnswerStore} on:submit|preventDefault={handleSubmit}>
-					<div class="grid grid-cols-[1fr_auto]">
-						<!-- Input -->
-						<textarea
-							class="textarea overflow-hidden min-h-[42px]"
-							rows="1"
-							placeholder="Enter to send, Shift+Enter for newline"
-							use:textareaAutosizeAction
-							on:keydown={handleKeyDown}
-							bind:value={input}
-							bind:this={textarea}
-						/>
-						<div class="flex flex-col md:flex-row items-center justify-end md:items-end">
-							<!-- Insert Code button -->
-							<button
-								type="submit"
-								class="btn btn-sm ml-2"
-								on:click|preventDefault={handleInsertCode}
-							>
-								<CodeBracket class="w-6 h-6" />
-							</button>
-							<Record
-								bind:stopRecording={stopRecording}
-								on:submitMessage={async () => {
-									await tick();
-									console.log('Submit input', input);
-									handleSubmit();
-								}}
-								on:transcribe={async ({detail}) => {
-									console.log('Updated input', input);
-									input = `${input} ${detail}`;
-									await tick();
-								}}
-							/>
-							<!-- Send button -->
-							<button type="submit" class="btn btn-sm ml-2">
-								<PaperAirplane class="w-6 h-6" />
-							</button>
-						</div>
-					</div>
-				</form>
-			</div>
-			<!-- Tokens -->
-			{#if input.length > 0}
-				<button
-					class="flex items-center text-xs text-slate-500 dark:text-slate-200 ml-4 space-x-1"
-					class:animate-pulse={!!debounceTimer}
-					on:click={openTokenCostDialog}
-				>
-					<span>{tokensLeft} tokens left</span>
-					<CircleStack class="w-6 h-6" />
+	<div class="flex items-center justify-center" class:hidden={!$isLoadingAnswerStore}>
+		<button class="btn variant-ghost w-48 self-center" on:click={() => $eventSourceStore.stop()}>
+			Cancel generating
+		</button>
+	</div>
+	<div class="flex flex-col space-y-2 md:mx-auto md:w-3/4 px-2 md:px-8" class:hidden={$isLoadingAnswerStore}>
+		{#if isEditMode}
+			<div class="flex items-center justify-between">
+				<p>Editing creates a <span class="italic">chat branch</span>.</p>
+				<button class="btn btn-sm" on:click={cancelEditMessage}>
+					<span>Cancel</span>
 				</button>
-			{/if}
+			</div>
+		{/if}
+		<div class="grid">
+			<form use:focusTrap={!$isLoadingAnswerStore} on:submit|preventDefault={handleSubmit}>
+				<div class="grid grid-cols-[1fr_auto]">
+					<!-- Input -->
+					<textarea
+						class="textarea overflow-hidden min-h-[42px]"
+						rows="1"
+						placeholder="Enter to send, Shift+Enter for newline"
+						use:textareaAutosizeAction
+						on:keydown={handleKeyDown}
+						bind:value={input}
+						bind:this={textarea}
+					/>
+					<div class="flex flex-col md:flex-row items-center justify-end md:items-end">
+						<!-- Insert Code button -->
+						<button
+							type="submit"
+							class="btn btn-sm ml-2"
+							on:click|preventDefault={handleInsertCode}
+						>
+							<CodeBracket class="w-6 h-6" />
+						</button>
+						<Record
+							on:submitMessage={async () => {
+								await tick();
+								console.log('Submit input', input);
+								handleSubmit();
+							}}
+							on:transcribe={async ({detail}) => {
+								console.log('Updated input', input);
+								input = `${input} ${detail}`;
+								await tick();
+							}}
+						/>
+						<!-- Send button -->
+						<button type="submit" class="btn btn-sm ml-2">
+							<PaperAirplane class="w-6 h-6" />
+						</button>
+					</div>
+				</div>
+			</form>
 		</div>
-	{/if}
+		<!-- Tokens -->
+		{#if input.length > 0}
+			<button
+				class="flex items-center text-xs text-slate-500 dark:text-slate-200 ml-4 space-x-1"
+				class:animate-pulse={!!debounceTimer}
+				on:click={openTokenCostDialog}
+			>
+				<span>{tokensLeft} tokens left</span>
+				<CircleStack class="w-6 h-6" />
+			</button>
+		{/if}
+	</div>
 </footer>
