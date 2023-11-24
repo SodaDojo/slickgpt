@@ -276,13 +276,14 @@
 							</button>
 							<Record
 								on:transcribe={async ({detail}) => {
-									if (stripPunctuation(detail) === 'enter') {
+									if (stripPunctuation(detail) === 'submit') {
 										await tick();
 										console.log('Submit input', input);
 										handleSubmit();
 									} else {
 										console.log('Updated input', input);
 										input = `${input} ${detail}`;
+										await tick();
 									}
 								}}
 							/>
