@@ -111,7 +111,8 @@
 		let { msg } = await response.json();
 
 		msg = msg.replace(/\n/g, ' ').trim();
-
+		msg = msg.replace(/\.$/, '');
+		
 		if (!msg) {
 			return;
 		}
