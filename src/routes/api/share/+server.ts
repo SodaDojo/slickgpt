@@ -74,7 +74,9 @@ export const DELETE: RequestHandler = async ({ request }) => {
 		const requestData = (await request.json()) as { [key: string]: string };
 		throwIfUnset('request data', requestData);
 
-		if (!Object.keys(requestData)?.length) throw new Error('No docs to delete provided');
+		if (!Object.keys(requestData)?.length) {
+			return respondToClient({ deleted: [] });
+		}
 
 		const updates: Record<string, any> = {};
 		const deleted: string[] = [];
