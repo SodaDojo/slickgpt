@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { settingsStore } from '$misc/stores';
+	import { isRecordingStore, settingsStore, vadStore } from '$misc/stores';
 	import { Microphone, Stop } from '@inqling/svelte-icons/heroicon-24-solid';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { MicVAD, utils } from '@ricky0123/vad-web';
@@ -15,25 +15,17 @@
 		"ort-wasm-threaded.wasm": "/ort-wasm-threaded.wasm",
 	};
 
-	let isRecording = false;
 	const dispatch = createEventDispatcher();
 
-	let vadLoading: boolean = true;
+	let vadLoading: boolean = false;
 	let vadError: Error | null = null;
-	let vadListening: boolean = false;
-	let vad: MicVAD | null = null;
-
+	
 	onMount(() => {
 		async function doSetup() {
 			await setupVad();
 		}
 		
 		doSetup();
-
-		return () => {
-			console.log('Clean up vad');
-			vadPause();
-		};
 	});
 
 	function onSpeechEnd(audio: Float32Array) {
@@ -53,6 +45,11 @@
 	}
 
 	async function setupVad() {
+		if ($vadStore) {
+			return;
+		}
+
+		vadLoading = true;
 		let myvad: MicVAD | null;
 
 		try {
@@ -68,36 +65,15 @@
 			console.error(e);
 			vadError = e as Error;
 			return;
+		} finally {
+			vadLoading = false
 		}
 
-		vad = myvad;
-		vadLoading = false;
+		vadStore.set(myvad);
 
 		if (startRecordingOnLoad) {
-			myvad?.start();
-			vadListening = true;
+			startRecording();
 		}
-	}
-
-	function vadPause() {
-		if (!vadLoading && !vadError) {
-			console.log('Pause vad');
-			vad?.pause()
-			vadListening = false;
-		}
-	}
-
-	function vadStart() {
-		if (!vadLoading && !vadError) {
-			console.log('Start vad');
-			vad?.start()
-			vadListening = true;
-		}
-	}
-
-	async function startRecording() {
-		isRecording = true;
-		vadStart();
 	}
 
 	async function transcribe(audioFile: File) {
@@ -121,26 +97,34 @@
 		dispatch('transcribe', msg);
 	}
 
-	function stopRecording() {
-		vadPause();
-		isRecording = false;
+	export const startRecording = async () => {
+		console.log('Start recording');
+		isRecordingStore.set(true);
+		if ($vadStore) {
+			$vadStore.start();
+		}
+	}
+
+	export const stopRecording = () => {
+		console.log('Stop recording');
+		if ($vadStore) {
+			$vadStore.pause()
+		}
+		isRecordingStore.set(false);
 	}
 
 	function toggleRecording() {
-		console.log('Toggling recording');
-		if (isRecording) {
-			console.log('Stop recording');
+		if ($isRecordingStore) {
 			stopRecording();
 		}
 		else { 
-			console.log('Start recording');
 			startRecording();
 		}
 	}
 </script>
 
 <button type="button" class="btn btn-sm ml-2" on:click={toggleRecording}>
-	{#if isRecording}
+	{#if $isRecordingStore}
 		<Stop class="w-6 h-6 text-red-600" />
 	{:else}
 		<Microphone class="w-6 h-6" />

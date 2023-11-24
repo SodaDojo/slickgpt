@@ -32,7 +32,8 @@
 	let messageTokens = 0;
 	let lastUserMessage: ChatMessage | null = null;
 	let currentMessages: ChatMessage[] | null = null;
-
+	let stopRecording: any;
+	
 	let isEditMode = false;
 	let originalMessage: ChatMessage | null = null;
 
@@ -52,7 +53,10 @@
 		}
 	});
 
-	onDestroy(unsubscribe);
+	onDestroy(() => {
+		unsubscribe();
+		stopRecording();
+	});
 
 	let tokensLeft = -1;
 	$: {
@@ -275,6 +279,7 @@
 								<CodeBracket class="w-6 h-6" />
 							</button>
 							<Record
+								bind:stopRecording={stopRecording}
 								on:transcribe={async ({detail}) => {
 									if (stripPunctuation(detail) === 'submit') {
 										await tick();
