@@ -226,6 +226,11 @@
 		await tick();
 		textareaAutosizeAction(textarea);
 	}
+
+	function stripPunctuation(str: string): string {
+    	return str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim().toLowerCase();
+	}
+
 </script>
 
 <footer
@@ -269,12 +274,16 @@
 							>
 								<CodeBracket class="w-6 h-6" />
 							</button>
-							<Record bind:input
-								on:inputChange={async () => {
-									await tick();
-								}}
-								on:submitMessage={() => {
-									handleSubmit();
+							<Record
+								on:transcribe={async ({detail}) => {
+									if (stripPunctuation(detail) === 'enter') {
+										await tick();
+										console.log('Submit input', input);
+										handleSubmit();
+									} else {
+										console.log('Updated input', input);
+										input = `${input} ${detail}`;
+									}
 								}}
 							/>
 							<!-- Send button -->

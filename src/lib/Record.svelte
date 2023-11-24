@@ -5,7 +5,6 @@
 	import { MicVAD, utils } from '@ricky0123/vad-web';
 	import * as ort from "onnxruntime-web";
 
-	export let input: string;
 	export let startRecordingOnLoad: boolean = false;
 
 	// Re-configure ort
@@ -116,14 +115,7 @@
 		}
 
 		console.log('Message', msg);
-
-		if (msg.match(/over/i)) {
-			console.log('Dispatch submit')
-			dispatch('submitMessage');
-		} else {
-			input = `${input} ${msg}`;
-			dispatch('inputChange');
-		}
+		dispatch('transcribe', msg);
 	}
 
 	function stopRecording() {
