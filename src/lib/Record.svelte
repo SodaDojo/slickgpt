@@ -6,6 +6,7 @@
 	import * as ort from "onnxruntime-web";
 
 	export let startRecordingOnLoad: boolean = false;
+	export let autoSubmitMs: number = 3000;
 
 	// Re-configure ort
 	ort.env.wasm.wasmPaths = {
@@ -19,6 +20,7 @@
 
 	let vadLoading: boolean = false;
 	let vadError: Error | null = null;
+	let autoSubmitTimerId: any;
 	
 	onMount(() => {
 		async function doSetup() {
@@ -29,8 +31,8 @@
 	});
 
 	function onSpeechEnd(audio: Float32Array) {
-		console.log('Vad speech end');
-		
+		stopAutoTimer();
+
 		const wavBuffer = utils.encodeWAV(audio);
 		// const base64 = utils.arrayBufferToBase64(wavBuffer);
 		// const url = `data:audio/wav;base64,${base64}`;
@@ -41,7 +43,26 @@
 	}
 
 	function onSpeechStart() {
-		console.log('Vad speech start');
+		stopAutoTimer();
+	}
+
+	function stopAutoTimer() {
+		if (autoSubmitTimerId) {
+			clearTimeout(autoSubmitTimerId);
+			autoSubmitTimerId = undefined;
+		}
+	}
+
+	function startAutoTimer() {
+		stopAutoTimer();
+
+		autoSubmitTimerId = setTimeout(() => {
+			submitMessage();
+		}, autoSubmitMs);
+	}
+
+	function submitMessage() {
+		dispatch('submitMessage');
 	}
 
 	async function setupVad() {
@@ -60,7 +81,6 @@
 				onSpeechEnd,
 				onSpeechStart
 			});
-			console.log('Finished setting up vad');
 		} catch (e) {
 			console.error(e);
 			vadError = e as Error;
@@ -74,6 +94,10 @@
 		if (startRecordingOnLoad) {
 			startRecording();
 		}
+	}
+
+	function stripPunctuation(str: string): string {
+    	return str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim().toLowerCase();
 	}
 
 	async function transcribe(audioFile: File) {
@@ -93,12 +117,16 @@
 			return;
 		}
 
-		console.log('Message', msg);
-		dispatch('transcribe', msg);
+		if (stripPunctuation(msg) === 'submit') {
+			stopAutoTimer();
+			submitMessage();
+		} else {
+			dispatch('transcribe', msg);
+			startAutoTimer();
+		}
 	}
 
 	export const startRecording = async () => {
-		console.log('Start recording');
 		isRecordingStore.set(true);
 		if ($vadStore) {
 			$vadStore.start();
@@ -106,7 +134,8 @@
 	}
 
 	export const stopRecording = () => {
-		console.log('Stop recording');
+		stopAutoTimer();
+		
 		if ($vadStore) {
 			$vadStore.pause()
 		}

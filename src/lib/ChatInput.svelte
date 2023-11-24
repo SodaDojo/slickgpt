@@ -230,11 +230,6 @@
 		await tick();
 		textareaAutosizeAction(textarea);
 	}
-
-	function stripPunctuation(str: string): string {
-    	return str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim().toLowerCase();
-	}
-
 </script>
 
 <footer
@@ -280,16 +275,15 @@
 							</button>
 							<Record
 								bind:stopRecording={stopRecording}
+								on:submitMessage={async () => {
+									await tick();
+									console.log('Submit input', input);
+									handleSubmit();
+								}}
 								on:transcribe={async ({detail}) => {
-									if (stripPunctuation(detail) === 'submit') {
-										await tick();
-										console.log('Submit input', input);
-										handleSubmit();
-									} else {
-										console.log('Updated input', input);
-										input = `${input} ${detail}`;
-										await tick();
-									}
+									console.log('Updated input', input);
+									input = `${input} ${detail}`;
+									await tick();
 								}}
 							/>
 							<!-- Send button -->
