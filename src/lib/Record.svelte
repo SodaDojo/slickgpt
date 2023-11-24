@@ -108,7 +108,9 @@
 			method: 'POST',
 			body: formData
 		});
-		const { msg } = await response.json();
+		let { msg } = await response.json();
+
+		msg = msg.replace(/\n/g, ' ').trim();
 
 		if (!msg) {
 			return;
