@@ -2,7 +2,7 @@
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { getModalStore, getToastStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import hljs from 'highlight.js';
-	import { XMark } from '@inqling/svelte-icons/heroicon-24-solid';
+	import { Pencil, PencilSquare, XMark } from '@inqling/svelte-icons/heroicon-24-solid';
 	import { Trash, Cog6Tooth, Share } from '@inqling/svelte-icons/heroicon-24-outline';
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
@@ -165,6 +165,14 @@
 				{/if}
 			</span>
 
+			<!-- Context -->
+			<button
+				class="btn btn-sm variant-ghost-tertiary"
+				on:click={() => showModalComponent(modalStore, 'ContextModal', { slug })}
+			>
+				<PencilSquare class="w-6 h-6 text-white" />
+			</button>
+
 			<!-- Share -->
 			<span
 				class="relative inline-flex"
@@ -213,7 +221,7 @@
 			<!-- Context -->
 			<HintMessage
 				title="Context"
-				variantClass="variant-ghost-tertiary"
+				variantClass="variant-ghost-tertiary hidden"
 				actionClass="grid h-full"
 				omitAlertActionsClass={true}
 			>
