@@ -33,6 +33,8 @@
 
 		return () => {
 			stopRecording();
+			cleanupVad();
+			
 		}
 	});
 
@@ -92,6 +94,13 @@
 		if (startRecordingOnLoad) {
 			startRecording();
 		}
+	}
+
+	function cleanupVad() {
+		vad?.audioContext.close();
+		vad?.stream.getTracks().forEach((track) => {
+			track.stop();
+		});
 	}
 
 	function stripPunctuation(str: string): string {
